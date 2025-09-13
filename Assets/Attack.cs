@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Attack : StateMachineBehaviour
 {
@@ -9,6 +9,8 @@ public class Attack : StateMachineBehaviour
     public float moveSpeed = 2f;
     public float attackRange = 1f;
     public float attackCooldown = 0.3f;
+
+    public int damageAmount = 10; // Amount of damage to deal to the player
 
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
@@ -43,8 +45,12 @@ public class Attack : StateMachineBehaviour
             // Reset cooldown
             attackTimer = attackCooldown;
 
-            // TODO: Deal damage (e.g., call a method on player health script)
-            // player.GetComponent<PlayerHealth>()?.TakeDamage(1);
+            // ✅ Call PlayerManager.Damage()
+            PlayerManager playerManager = player.GetComponent<PlayerManager>();
+            if (playerManager != null)
+            {
+                playerManager.TakeDamage(damageAmount);
+            }
         }
     }
 }

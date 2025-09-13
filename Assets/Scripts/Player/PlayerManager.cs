@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -37,6 +38,9 @@ public class PlayerManager : MonoBehaviour
     private bool isGrounded;
     private bool canJump; // Only allow jump when this is true
     private float lastAttackTime;
+
+    public Slider healthbar;
+    
     
     void Start()
     {
@@ -194,13 +198,14 @@ public class PlayerManager : MonoBehaviour
         {
             Die();
         }
+        UpdateHealthBar();
     }
     
     public void Heal(float healAmount)
     {
         currentHealth += healAmount;
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
-        
+        UpdateHealthBar();
         Debug.Log($"Player healed {healAmount}. Health: {currentHealth}/{maxHealth}");
     }
     
@@ -221,6 +226,14 @@ public class PlayerManager : MonoBehaviour
         {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+        }
+    }
+
+    public void UpdateHealthBar()
+    {
+        if (healthbar != null)
+        {
+            healthbar.value = GetHealthPercentage();
         }
     }
 }
