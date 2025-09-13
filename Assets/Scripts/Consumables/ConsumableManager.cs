@@ -55,31 +55,41 @@ public class ConsumableManager : MonoBehaviour
     {
         // Create a simple cube as consumable
         GameObject tempConsumable = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        tempConsumable.name = "HealthConsumable";
+        tempConsumable.name = "HealthConsumable_Prefab";
         tempConsumable.transform.localScale = Vector3.one * 0.5f;
         
         // Make it green for health
         Renderer renderer = tempConsumable.GetComponent<Renderer>();
-        renderer.material.color = Color.green;
+        if (renderer != null && renderer.material != null)
+        {
+            renderer.material.color = Color.green;
+        }
         
         // Add the consumable component
         tempConsumable.AddComponent<HealthConsumable>();
         
-        // Set as trigger for collision detection
-        Collider collider = tempConsumable.GetComponent<Collider>();
-        if (collider != null)
+        // Remove the default 3D collider and add 2D collider for 2D games
+        Collider collider3D = tempConsumable.GetComponent<Collider>();
+        if (collider3D != null)
         {
-            collider.isTrigger = true;
+            DestroyImmediate(collider3D);
         }
         
-        // For 2D games, add 2D components
-        tempConsumable.AddComponent<BoxCollider2D>().isTrigger = true;
+        // Add 2D collider as trigger
+        BoxCollider2D collider2D = tempConsumable.AddComponent<BoxCollider2D>();
+        collider2D.isTrigger = true;
         
-        // Make it a prefab reference
+        // Make it a prefab reference and hide it
         consumablePrefab = tempConsumable;
         tempConsumable.SetActive(false);
         
-        Debug.Log("Auto-created simple consumable prefab!");
+        // Move it out of the scene view (optional)
+        tempConsumable.transform.position = new Vector3(1000, 1000, 1000);
+        
+        // Make it a child of this manager to keep hierarchy clean
+        tempConsumable.transform.SetParent(transform);
+        
+        Debug.Log("Auto-created simple consumable prefab (hidden)!");
     }
 
     void CreateDefaultSpawnPoints()
@@ -143,6 +153,9 @@ public class ConsumableManager : MonoBehaviour
         GameObject newConsumable = Instantiate(consumablePrefab, spawnPoint.position, Quaternion.identity);
         newConsumable.SetActive(true);
         
+        // Rename for clarity
+        newConsumable.name = $"HealthConsumable_{activeConsumables.Count}";
+        
         // Add to active list
         activeConsumables.Add(newConsumable);
         
@@ -154,23 +167,13 @@ public class ConsumableManager : MonoBehaviour
         }
         healthComp.Initialize(healAmount, playerManager);
         
-        Debug.Log($"Spawned health consumable at {spawnPoint.position} - Heal Amount: {healAmount}");
+        Debug.Log($"Spawned health consumable '{newConsumable.name}' at {spawnPoint.position} - Heal Amount: {healAmount}");
     }
 
     // Public method to spawn consumable manually (for testing)
     public void SpawnConsumableNow()
     {
         SpawnConsumable();
-    }
-
-    void Update()
-    {
-        // Optional: Press C to spawn consumable for testing
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            SpawnConsumableNow();
-            Debug.Log("Manual consumable spawn!");
-        }
     }
 }
 
