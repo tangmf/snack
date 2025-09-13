@@ -75,6 +75,7 @@ public class PlayerManager : MonoBehaviour
             attackObj.transform.localPosition = new Vector3(1f, 0f, 0f);
             attackPoint = attackObj.transform;
         }
+        UpdateHealthBar();
 
         Debug.Log($"Player spawn position set to: {spawnPosition}");
     }
@@ -186,7 +187,13 @@ public class PlayerManager : MonoBehaviour
             {
                 if (contact.normal.y > 0.7f)
                 {
+                    if (isGrounded == false)
+                    {
+                        animator.SetBool("isGrounded", true);
+                    }
+                        Debug.Log("Player landed on ground.");
                     isGrounded = true;
+                    
                     canJump = true;
                     Debug.Log("Player landed! Jump re-enabled.");
                     break;
@@ -200,6 +207,7 @@ public class PlayerManager : MonoBehaviour
         if (collision.gameObject.CompareTag(groundTag) || collision.gameObject.name.Contains("Ground"))
         {
             isGrounded = false;
+            animator.SetBool("isGrounded", false);
             Debug.Log("Player left ground.");
         }
     }
