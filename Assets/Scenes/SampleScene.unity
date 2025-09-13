@@ -354,8 +354,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc85fdd2570ad7644b1b8c196f2a53ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  detectionRange: 3
   playerDetected: 0
-  detectPoint: {fileID: 21357234}
+  playerTag: Player
+  animator: {fileID: 21357238}
 --- !u!114 &21357240
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1276,7 +1278,7 @@ GameObject:
   - component: {fileID: 757822145}
   m_Layer: 0
   m_Name: Square
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2232,7 +2234,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1931246576}
   - component: {fileID: 1931246575}
-  - component: {fileID: 1931246573}
   - component: {fileID: 1931246578}
   - component: {fileID: 1931246577}
   m_Layer: 0
@@ -2242,20 +2243,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1931246573
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1931246572}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc85fdd2570ad7644b1b8c196f2a53ce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerDetected: 0
-  detectPoint: {fileID: 0}
 --- !u!114 &1931246575
 MonoBehaviour:
   m_ObjectHideFlags: 0
