@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
 {
-    // Start is called before the first frame update
     [Header("Player Stats")]
     [SerializeField]
     private float maxHealth = 100f;
@@ -17,31 +16,50 @@ public class PlayerManager : MonoBehaviour
     private float attackRange = 2f;
 
     [SerializeField]
-    private float attackCooldown = 1f;
+    private float attackCooldown = 0.5f;
 
     [Header("Movement Stats")]
     [SerializeField]
-    private float moveSpeed = 5f;
+    private float moveSpeed = 8f;
+    [SerializeField]
+    private float jumpForce = 15f;
+    [SerializeField]
+    private float dunkForce = 20f;
+
+    [Header("Ground Check")]
+    [SerializeField]
+    private string groundTag = "Ground"; // Tag for ground objects
 
     [Header("Components")]
     public Transform attackPoint;
     public LayerMask enemyLayers;
 
     private Rigidbody2D rb;
-    private Vector2 movement;
-
+    private float horizontalInput;
+    private bool isGrounded;
+    private bool canJump; // Only allow jump when this is true
+    private bool canDunk;
     private float lastAttackTime;
     
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         currentHealth = maxHealth;
+        canJump = true; // Start with ability to jump
 
+        // Physics settings for platformer
+        if (rb != null)
+        {
+            rb.freezeRotation = true;
+            rb.gravityScale = 3f; // Normal gravity for platformer
+        }
+
+        // Create attack point if not assigned
         if (attackPoint == null)
         {
             GameObject attackObj = new GameObject("AttackPoint");
             attackObj.transform.SetParent(transform);
-            attackObj.transform.localPosition = new Vector3(1f, 0f, 0f); // In front of the player
+            attackObj.transform.localPosition = new Vector3(1f, 0f, 0f);
             attackPoint = attackObj.transform;
         }
     }
@@ -49,34 +67,108 @@ public class PlayerManager : MonoBehaviour
     void Update()
     {
         HandleInput();
-        HandleMeleeAttack();
+        HandleAttack();
+        
+        // Debug ground state
+        Debug.Log($"Is Grounded: {isGrounded}, Can Jump: {canJump}, Can Dunk: {canDunk}");
     }
     
     void FixedUpdate()
     {
         HandleMovement();
     }
-    
+
     void HandleInput()
     {
-        // WASD movement input
-        movement.x = Input.GetAxisRaw("Horizontal");
-        movement.y = Input.GetAxisRaw("Vertical");
-        
-        // Normalize diagonal movement
-        movement = movement.normalized;
+        // Horizontal movement (A/D or Arrow keys)
+        horizontalInput = Input.GetAxisRaw("Horizontal");
+
+        // Jump (W, Space, or Up Arrow) - only if can jump
+        if ((Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow)) 
+            && canJump)
+        {
+            Jump();
+        }
+
+        // Dunk attack (S or Down Arrow while in air)
+        if ((Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) && !isGrounded && canDunk)
+        {
+            DunkAttack();
+        }
     }
-    
+
     void HandleMovement()
     {
-        // Move the player using Rigidbody2D
-        rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime);
+        // Horizontal movement
+        Vector2 velocity = rb.velocity;
+        velocity.x = horizontalInput * moveSpeed;
+        rb.velocity = velocity;
+
+        // Flip sprite based on movement direction
+        if (horizontalInput > 0)
+        {
+            transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+        }
+        else if (horizontalInput < 0)
+        {
+            transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+        }
     }
-    
-    void HandleMeleeAttack()
+
+    void Jump()
     {
-        // Melee attack with left mouse button or spacebar
-        if ((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space)) && CanAttack())
+        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+        canJump = false;   // Disable jumping until touching ground
+        isGrounded = false; // Player is now in air
+        canDunk = true;    // Enable dunk ability after jumping
+        Debug.Log("Player jumped! Jump disabled until landing.");
+    }
+
+    void DunkAttack()
+    {
+        canDunk = false; // Can only dunk once per jump
+        rb.velocity = new Vector2(rb.velocity.x, -dunkForce);
+        
+        // Perform attack while dunking
+        PerformMeleeAttack();
+        Debug.Log("Dunk attack!");
+    }
+
+    // Detect when player touches ground
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        // Check if we hit the ground
+        if (collision.gameObject.CompareTag(groundTag) || collision.gameObject.name.Contains("Ground"))
+        {
+            // Make sure we're landing on top (not hitting from the side)
+            foreach (ContactPoint2D contact in collision.contacts)
+            {
+                if (contact.normal.y > 0.7f) // Hit from above
+                {
+                    isGrounded = true;
+                    canJump = true;  // Re-enable jumping
+                    canDunk = true;  // Reset dunk ability
+                    Debug.Log("Player landed! Jump re-enabled.");
+                    break;
+                }
+            }
+        }
+    }
+
+    // Detect when player leaves ground
+    void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag(groundTag) || collision.gameObject.name.Contains("Ground"))
+        {
+            isGrounded = false;
+            Debug.Log("Player left ground.");
+        }
+    }
+
+    void HandleAttack()
+    {
+        // Regular melee attack (Left mouse or X key)
+        if ((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.X)) && CanAttack())
         {
             PerformMeleeAttack();
         }
@@ -99,6 +191,14 @@ public class PlayerManager : MonoBehaviour
         foreach (Collider2D enemy in hitEnemies)
         {
             Debug.Log($"Hit {enemy.name} for {attackDamage} damage!");
+            
+            // Add knockback to enemies if they have Rigidbody2D
+            Rigidbody2D enemyRb = enemy.GetComponent<Rigidbody2D>();
+            if (enemyRb != null)
+            {
+                Vector2 knockbackDirection = (enemy.transform.position - transform.position).normalized;
+                enemyRb.AddForce(knockbackDirection * 10f, ForceMode2D.Impulse);
+            }
         }
         
         Debug.Log($"Melee attack! Hit {hitEnemies.Length} enemies.");
@@ -128,7 +228,6 @@ public class PlayerManager : MonoBehaviour
     void Die()
     {
         Debug.Log("Player died!");
-        // Add death logic here (restart level, show game over screen, etc.)
         gameObject.SetActive(false);
     }
     
@@ -138,7 +237,7 @@ public class PlayerManager : MonoBehaviour
     
     void OnDrawGizmosSelected()
     {
-        // Draw melee attack range in scene view
+        // Draw attack range
         if (attackPoint != null)
         {
             Gizmos.color = Color.red;
