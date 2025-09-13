@@ -6,15 +6,23 @@ public class ConsumableManager : MonoBehaviour
 {
     [Header("Consumable Settings")]
     [SerializeField]
-    private GameObject consumablePrefab; // Assign a prefab in inspector
+    private GameObject[] consumablePrefabs; // Array of different consumable prefabs
     [SerializeField]
     private float healAmount = 20f;
     [SerializeField]
     private float spawnInterval = 10f; // Spawn every 10 seconds
     [SerializeField]
-    private Transform[] spawnPoints; // Array of spawn locations
-    [SerializeField]
     private int maxConsumablesInScene = 3;
+
+    [Header("Spawn Area Settings")]
+    [SerializeField]
+    private float spawnHeight = 0f; // Same Y position for all spawns
+    [SerializeField]
+    private float minX = -10f; // Minimum X position
+    [SerializeField]
+    private float maxX = 10f;  // Maximum X position
+    [SerializeField]
+    private float spawnZ = 0f; // Z position (for 2D usually 0)
 
     [Header("Auto-Create Consumable")]
     [SerializeField]
@@ -33,92 +41,75 @@ public class ConsumableManager : MonoBehaviour
             return;
         }
 
-        // Create a simple consumable prefab if none assigned
-        if (consumablePrefab == null && autoCreateConsumable)
+        // Create consumable prefabs if none assigned
+        if ((consumablePrefabs == null || consumablePrefabs.Length == 0) && autoCreateConsumable)
         {
-            CreateSimpleConsumablePrefab();
-        }
-
-        // Create spawn points if none assigned
-        if (spawnPoints == null || spawnPoints.Length == 0)
-        {
-            CreateDefaultSpawnPoints();
+            CreateConsumablePrefabs();
         }
 
         // Start spawning consumables
         StartCoroutine(SpawnConsumablesRoutine());
         
         Debug.Log("ConsumableManager initialized!");
+        Debug.Log($"Spawn area: X({minX} to {maxX}), Y({spawnHeight}), Z({spawnZ})");
     }
 
-    void CreateSimpleConsumablePrefab()
+    void CreateConsumablePrefabs()
     {
-        // Create a simple cube as consumable
-        GameObject tempConsumable = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        tempConsumable.name = "HealthConsumable_Prefab";
-        tempConsumable.transform.localScale = Vector3.one * 0.5f;
+        // Create two different consumable prefabs
+        GameObject[] tempPrefabs = new GameObject[2];
         
-        // Make it green for health
-        Renderer renderer = tempConsumable.GetComponent<Renderer>();
-        if (renderer != null && renderer.material != null)
+        // Create first consumable (Green cube - Health)
+        tempPrefabs[0] = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        tempPrefabs[0].name = "HealthConsumable_Prefab";
+        tempPrefabs[0].transform.localScale = Vector3.one * 0.5f;
+        
+        Renderer renderer1 = tempPrefabs[0].GetComponent<Renderer>();
+        if (renderer1 != null && renderer1.material != null)
         {
-            renderer.material.color = Color.green;
+            renderer1.material.color = Color.green;
         }
         
-        // Add the consumable component
-        tempConsumable.AddComponent<HealthConsumable>();
+        tempPrefabs[0].AddComponent<HealthConsumable>();
         
-        // Remove the default 3D collider and add 2D collider for 2D games
-        Collider collider3D = tempConsumable.GetComponent<Collider>();
-        if (collider3D != null)
+        // Remove 3D collider and add 2D collider
+        Collider collider3D1 = tempPrefabs[0].GetComponent<Collider>();
+        if (collider3D1 != null) DestroyImmediate(collider3D1);
+        
+        BoxCollider2D collider2D1 = tempPrefabs[0].AddComponent<BoxCollider2D>();
+        collider2D1.isTrigger = true;
+        
+        // Create second consumable (Blue sphere - Different type)
+        tempPrefabs[1] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        tempPrefabs[1].name = "MegaHealthConsumable_Prefab";
+        tempPrefabs[1].transform.localScale = Vector3.one * 0.6f;
+        
+        Renderer renderer2 = tempPrefabs[1].GetComponent<Renderer>();
+        if (renderer2 != null && renderer2.material != null)
         {
-            DestroyImmediate(collider3D);
+            renderer2.material.color = Color.blue;
         }
         
-        // Add 2D collider as trigger
-        BoxCollider2D collider2D = tempConsumable.AddComponent<BoxCollider2D>();
-        collider2D.isTrigger = true;
+        tempPrefabs[1].AddComponent<HealthConsumable>();
         
-        // Make it a prefab reference and hide it
-        consumablePrefab = tempConsumable;
-        tempConsumable.SetActive(false);
+        // Remove 3D collider and add 2D collider
+        Collider collider3D2 = tempPrefabs[1].GetComponent<Collider>();
+        if (collider3D2 != null) DestroyImmediate(collider3D2);
         
-        // Move it out of the scene view (optional)
-        tempConsumable.transform.position = new Vector3(1000, 1000, 1000);
+        // Use CircleCollider2D instead of SphereCollider2D
+        CircleCollider2D collider2D2 = tempPrefabs[1].AddComponent<CircleCollider2D>();
+        collider2D2.isTrigger = true;
         
-        // Make it a child of this manager to keep hierarchy clean
-        tempConsumable.transform.SetParent(transform);
-        
-        Debug.Log("Auto-created simple consumable prefab (hidden)!");
-    }
-
-    void CreateDefaultSpawnPoints()
-    {
-        // Create some default spawn points around the origin
-        GameObject spawnPointParent = new GameObject("SpawnPoints");
-        spawnPointParent.transform.SetParent(transform);
-        
-        List<Transform> points = new List<Transform>();
-        
-        // Create 5 spawn points in different locations
-        Vector3[] positions = {
-            new Vector3(-5f, 2f, 0f),
-            new Vector3(5f, 2f, 0f),
-            new Vector3(0f, 5f, 0f),
-            new Vector3(-3f, -1f, 0f),
-            new Vector3(3f, -1f, 0f)
-        };
-
-        for (int i = 0; i < positions.Length; i++)
+        // Hide both prefabs
+        for (int i = 0; i < tempPrefabs.Length; i++)
         {
-            GameObject spawnPoint = new GameObject($"SpawnPoint_{i}");
-            spawnPoint.transform.SetParent(spawnPointParent.transform);
-            spawnPoint.transform.position = positions[i];
-            points.Add(spawnPoint.transform);
+            tempPrefabs[i].SetActive(false);
+            tempPrefabs[i].transform.position = new Vector3(1000, 1000, 1000);
+            tempPrefabs[i].transform.SetParent(transform);
         }
-
-        spawnPoints = points.ToArray();
-        Debug.Log($"Created {spawnPoints.Length} default spawn points!");
+        
+        consumablePrefabs = tempPrefabs;
+        Debug.Log("Auto-created 2 consumable prefabs (Green cube, Blue sphere)!");
     }
 
     IEnumerator SpawnConsumablesRoutine()
@@ -133,28 +124,34 @@ public class ConsumableManager : MonoBehaviour
             // Spawn new consumable if under limit
             if (activeConsumables.Count < maxConsumablesInScene)
             {
-                SpawnConsumable();
+                SpawnConsumableAtRandomLocation();
             }
         }
     }
 
-    void SpawnConsumable()
+    void SpawnConsumableAtRandomLocation()
     {
-        if (consumablePrefab == null || spawnPoints.Length == 0)
+        if (consumablePrefabs == null || consumablePrefabs.Length == 0)
         {
-            Debug.LogWarning("ConsumableManager: No prefab or spawn points available!");
+            Debug.LogWarning("ConsumableManager: No consumable prefabs available!");
             return;
         }
 
-        // Choose random spawn point
-        Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
+        // Generate random X position within the specified range
+        float randomX = Random.Range(minX, maxX);
+        
+        // Create spawn position with fixed Y and Z
+        Vector3 spawnPosition = new Vector3(randomX, spawnHeight, spawnZ);
+        
+        // Choose random consumable prefab
+        GameObject selectedPrefab = consumablePrefabs[Random.Range(0, consumablePrefabs.Length)];
         
         // Instantiate consumable
-        GameObject newConsumable = Instantiate(consumablePrefab, spawnPoint.position, Quaternion.identity);
+        GameObject newConsumable = Instantiate(selectedPrefab, spawnPosition, Quaternion.identity);
         newConsumable.SetActive(true);
         
         // Rename for clarity
-        newConsumable.name = $"HealthConsumable_{activeConsumables.Count}";
+        newConsumable.name = $"{selectedPrefab.name.Replace("_Prefab", "")}_{activeConsumables.Count}";
         
         // Add to active list
         activeConsumables.Add(newConsumable);
@@ -165,15 +162,43 @@ public class ConsumableManager : MonoBehaviour
         {
             healthComp = newConsumable.AddComponent<HealthConsumable>();
         }
-        healthComp.Initialize(healAmount, playerManager);
         
-        Debug.Log($"Spawned health consumable '{newConsumable.name}' at {spawnPoint.position} - Heal Amount: {healAmount}");
+        // Different heal amounts based on prefab type
+        float currentHealAmount = healAmount;
+        if (selectedPrefab.name.Contains("Mega"))
+        {
+            currentHealAmount = healAmount * 2; // Blue sphere heals more
+        }
+        
+        healthComp.Initialize(currentHealAmount, playerManager);
+        
+        Debug.Log($"Spawned '{newConsumable.name}' at ({randomX:F1}, {spawnHeight}, {spawnZ}) - Heal: {currentHealAmount}");
     }
 
     // Public method to spawn consumable manually (for testing)
     public void SpawnConsumableNow()
     {
-        SpawnConsumable();
+        SpawnConsumableAtRandomLocation();
+    }
+
+    // Visualize spawn area in Scene view
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        
+        // Draw spawn line
+        Vector3 leftPoint = new Vector3(minX, spawnHeight, spawnZ);
+        Vector3 rightPoint = new Vector3(maxX, spawnHeight, spawnZ);
+        
+        Gizmos.DrawLine(leftPoint, rightPoint);
+        
+        // Draw markers at endpoints
+        Gizmos.DrawWireCube(leftPoint, Vector3.one * 0.5f);
+        Gizmos.DrawWireCube(rightPoint, Vector3.one * 0.5f);
+        
+        // Draw text info (if you have Gizmos text available)
+        Gizmos.color = Color.white;
+        Gizmos.DrawWireCube(new Vector3((minX + maxX) / 2, spawnHeight, spawnZ), new Vector3(maxX - minX, 0.1f, 0.1f));
     }
 }
 
@@ -212,7 +237,7 @@ public class HealthConsumable : MonoBehaviour
     {
         hasBeenCollected = true;
         
-        Debug.Log($"COLLISION DETECTED: Player touched health consumable!");
+        Debug.Log($"COLLISION DETECTED: Player touched {gameObject.name}!");
         
         // Get player manager from colliding object
         PlayerManager pm = player.GetComponent<PlayerManager>();
@@ -235,7 +260,7 @@ public class HealthConsumable : MonoBehaviour
         }
 
         // Destroy the consumable
-        Debug.Log("Consumable destroyed!");
+        Debug.Log($"Consumable {gameObject.name} destroyed!");
         Destroy(gameObject);
     }
 }
