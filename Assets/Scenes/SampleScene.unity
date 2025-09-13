@@ -1165,7 +1165,6 @@ MonoBehaviour:
   attackCooldown: 1
   moveSpeed: 5
   jumpForce: 15
-  dunkForce: 20
   groundTag: Ground
   attackPoint: {fileID: 0}
   enemyLayers:
