@@ -9,7 +9,8 @@ public class PlayerDetection : MonoBehaviour
     public bool playerDetected = false;    // flag if player is close
     public string playerTag = "Player";    // tag to detect
     public Animator animator;
-    private Transform detectedPlayer = null;
+    public GameObject player;
+    public Transform detectedPlayer = null;
 
     private void Update()
     {
@@ -26,6 +27,7 @@ public class PlayerDetection : MonoBehaviour
         {
             playerDetected = true;
             detectedPlayer = playerObj.transform;
+            player = playerObj;
             animator.SetBool("isPlayerDetected", true);
             Debug.Log("Player detected on x-axis!");
         }
