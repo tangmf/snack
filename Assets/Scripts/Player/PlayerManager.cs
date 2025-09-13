@@ -27,6 +27,13 @@ public class PlayerManager : MonoBehaviour
     [Header("Ground Check")]
     [SerializeField] private string groundTag = "Ground";
 
+    [Header("Audio Settings")]
+    [SerializeField] private AudioClip jumpSound;
+    [SerializeField] private AudioClip attackSound;
+    [SerializeField] private AudioClip backgroundMusic;
+    [SerializeField] private float musicVolume = 0.5f;
+    [SerializeField] private float sfxVolume = 0.7f;
+
     [Header("Components")]
     public Transform attackPoint;
     public LayerMask enemyLayers;
@@ -39,12 +46,17 @@ public class PlayerManager : MonoBehaviour
     private bool canJump;
     private float lastAttackTime;
     private bool isDead = false;
+    private AudioSource sfxAudioSource; // For sound effects
+    private AudioSource musicAudioSource; // For background music
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         currentHealth = maxHealth;
         canJump = true;
+
+        // Set up audio sources
+        SetupAudio();
 
         // Store the starting position for respawning
         spawnPosition = transform.position;
@@ -65,6 +77,50 @@ public class PlayerManager : MonoBehaviour
         }
 
         Debug.Log($"Player spawn position set to: {spawnPosition}");
+    }
+
+    void SetupAudio()
+    {
+        // Get existing AudioSources or create new ones
+        AudioSource[] audioSources = GetComponents<AudioSource>();
+        
+        if (audioSources.Length == 0)
+        {
+            // Create SFX AudioSource
+            sfxAudioSource = gameObject.AddComponent<AudioSource>();
+            // Create Music AudioSource
+            musicAudioSource = gameObject.AddComponent<AudioSource>();
+        }
+        else if (audioSources.Length == 1)
+        {
+            sfxAudioSource = audioSources[0];
+            musicAudioSource = gameObject.AddComponent<AudioSource>();
+        }
+        else
+        {
+            sfxAudioSource = audioSources[0];
+            musicAudioSource = audioSources[1];
+        }
+
+        // Configure SFX AudioSource
+        sfxAudioSource.playOnAwake = false;
+        sfxAudioSource.volume = sfxVolume;
+        sfxAudioSource.loop = false;
+
+        // Configure Music AudioSource
+        musicAudioSource.playOnAwake = false;
+        musicAudioSource.volume = musicVolume;
+        musicAudioSource.loop = true;
+
+        // Start background music if assigned
+        if (backgroundMusic != null)
+        {
+            musicAudioSource.clip = backgroundMusic;
+            musicAudioSource.Play();
+            Debug.Log("Background music started!");
+        }
+
+        Debug.Log("Audio system initialized!");
     }
 
     void Update()
@@ -115,6 +171,10 @@ public class PlayerManager : MonoBehaviour
         rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         canJump = false;
         isGrounded = false;
+
+        // Play jump sound
+        PlaySFX(jumpSound);
+
         Debug.Log("Player jumped! Jump disabled until landing.");
     }
 
@@ -146,12 +206,14 @@ public class PlayerManager : MonoBehaviour
 
     void HandleAttack()
     {
-        // Attack input: Spacebar, Left Mouse, or X
-        if ((Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.X))
-            )
+        // Attack input: Left Mouse or X (removed spacebar since it's used for jumping)
+        if ((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.X)) && CanAttack())
         {
+            // Trigger animation and perform attack (sound is now played in PerformMeleeAttack)
             if (animator != null)
                 animator.SetTrigger("Attack");
+            
+            PerformMeleeAttack();
         }
     }
 
@@ -166,8 +228,12 @@ public class PlayerManager : MonoBehaviour
 
         lastAttackTime = Time.time;
 
-        // Trigger attack animation
-        
+        // Play attack sound at attack point location using PlayClipAtPoint
+        if (attackSound != null)
+        {
+            AudioSource.PlayClipAtPoint(attackSound, attackPoint.position, sfxVolume);
+            Debug.Log($"Playing attack sound at position: {attackPoint.position}");
+        }
 
         // Detect enemies in range
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
@@ -192,6 +258,50 @@ public class PlayerManager : MonoBehaviour
         }
 
         Debug.Log($"Melee attack performed! Hit {hitEnemies.Length} enemies.");
+    }
+
+    // Helper method to play sound effects
+    void PlaySFX(AudioClip clip)
+    {
+        if (clip != null && sfxAudioSource != null)
+        {
+            sfxAudioSource.PlayOneShot(clip);
+            Debug.Log($"Playing SFX: {clip.name}");
+        }
+        else if (clip == null)
+        {
+            Debug.LogWarning("Audio clip is null!");
+        }
+    }
+
+    // Method to control background music
+    public void SetMusicVolume(float volume)
+    {
+        musicVolume = Mathf.Clamp01(volume);
+        if (musicAudioSource != null)
+            musicAudioSource.volume = musicVolume;
+    }
+
+    public void SetSFXVolume(float volume)
+    {
+        sfxVolume = Mathf.Clamp01(volume);
+        if (sfxAudioSource != null)
+            sfxAudioSource.volume = sfxVolume;
+    }
+
+    public void StopMusic()
+    {
+        if (musicAudioSource != null)
+            musicAudioSource.Stop();
+    }
+
+    public void PlayMusic()
+    {
+        if (musicAudioSource != null && backgroundMusic != null)
+        {
+            musicAudioSource.clip = backgroundMusic;
+            musicAudioSource.Play();
+        }
     }
 
     public void TakeDamage(float damage)
