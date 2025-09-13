@@ -23,8 +23,6 @@ public class PlayerManager : MonoBehaviour
     private float moveSpeed = 8f;
     [SerializeField]
     private float jumpForce = 15f;
-    [SerializeField]
-    private float dunkForce = 20f;
 
     [Header("Ground Check")]
     [SerializeField]
@@ -38,7 +36,6 @@ public class PlayerManager : MonoBehaviour
     private float horizontalInput;
     private bool isGrounded;
     private bool canJump; // Only allow jump when this is true
-    private bool canDunk;
     private float lastAttackTime;
     
     void Start()
@@ -70,7 +67,7 @@ public class PlayerManager : MonoBehaviour
         HandleAttack();
         
         // Debug ground state
-        Debug.Log($"Is Grounded: {isGrounded}, Can Jump: {canJump}, Can Dunk: {canDunk}");
+        Debug.Log($"Is Grounded: {isGrounded}, Can Jump: {canJump}");
     }
     
     void FixedUpdate()
@@ -88,12 +85,6 @@ public class PlayerManager : MonoBehaviour
             && canJump)
         {
             Jump();
-        }
-
-        // Dunk attack (S or Down Arrow while in air)
-        if ((Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) && !isGrounded && canDunk)
-        {
-            DunkAttack();
         }
     }
 
@@ -120,18 +111,7 @@ public class PlayerManager : MonoBehaviour
         rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         canJump = false;   // Disable jumping until touching ground
         isGrounded = false; // Player is now in air
-        canDunk = true;    // Enable dunk ability after jumping
         Debug.Log("Player jumped! Jump disabled until landing.");
-    }
-
-    void DunkAttack()
-    {
-        canDunk = false; // Can only dunk once per jump
-        rb.velocity = new Vector2(rb.velocity.x, -dunkForce);
-        
-        // Perform attack while dunking
-        PerformMeleeAttack();
-        Debug.Log("Dunk attack!");
     }
 
     // Detect when player touches ground
@@ -147,7 +127,6 @@ public class PlayerManager : MonoBehaviour
                 {
                     isGrounded = true;
                     canJump = true;  // Re-enable jumping
-                    canDunk = true;  // Reset dunk ability
                     Debug.Log("Player landed! Jump re-enabled.");
                     break;
                 }
