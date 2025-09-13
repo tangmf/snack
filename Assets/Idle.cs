@@ -1,38 +1,36 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Idle : StateMachineBehaviour
 {
+    public float moveDistance = 1f;   // how far to sway left/right
+    public float cycleDuration = 2f;  // full cycle time (left → right → left)
 
+    private Vector3 startPos;
+    private float timer;
 
-    // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
-    //override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    //{
-    //    
-    //}
+    // Called when entering idle state
+    override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    {
+        startPos = animator.transform.position; // store starting position
+        timer = 0f;
+    }
 
-    // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
-    //override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    //{
-    //    
-    //}
+    // Called every frame while in idle state
+    override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    {
+        if (animator == null) return;
 
-    // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
-    //override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    //{
-    //    
-    //}
+        timer += Time.deltaTime;
 
-    // OnStateMove is called right after Animator.OnAnimatorMove()
-    //override public void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    //{
-    //    // Implement code that processes and affects root motion
-    //}
+        // Convert timer into angle (0 → 2π over cycleDuration)
+        float angle = (timer / cycleDuration) * Mathf.PI * 2f;
 
-    // OnStateIK is called right after Animator.OnAnimatorIK()
-    //override public void OnStateIK(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    //{
-    //    // Implement code that sets up animation IK (inverse kinematics)
-    //}
+        // sine wave oscillation (-1 → 1)
+        float offset = Mathf.Sin(angle) * moveDistance;
+
+        // Apply to position (sway left and right)
+        animator.transform.position = startPos + Vector3.right * offset;
+    }
 }
