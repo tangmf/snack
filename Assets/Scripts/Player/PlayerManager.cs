@@ -18,6 +18,12 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private float moveSpeed = 8f;
     [SerializeField] private float jumpForce = 15f;
 
+    [Header("Respawn Settings")]
+    [SerializeField]
+    private Vector3 spawnPosition; // Store the starting position
+    [SerializeField]
+    private float respawnDelay = 0f; // Delay before respawning
+
     [Header("Ground Check")]
     [SerializeField] private string groundTag = "Ground";
 
@@ -32,6 +38,7 @@ public class PlayerManager : MonoBehaviour
     private bool isGrounded;
     private bool canJump;
     private float lastAttackTime;
+    private bool isDead = false;
 
     void Start()
     {
@@ -39,6 +46,10 @@ public class PlayerManager : MonoBehaviour
         currentHealth = maxHealth;
         canJump = true;
 
+        // Store the starting position for respawning
+        spawnPosition = transform.position;
+
+        // Physics settings for platformer
         if (rb != null)
         {
             rb.freezeRotation = true;
@@ -52,19 +63,28 @@ public class PlayerManager : MonoBehaviour
             attackObj.transform.localPosition = new Vector3(1f, 0f, 0f);
             attackPoint = attackObj.transform;
         }
+
+        Debug.Log($"Player spawn position set to: {spawnPosition}");
     }
 
     void Update()
     {
-        HandleInput();
-        HandleAttack();
-
+        if (!isDead)
+        {
+            HandleInput();
+            HandleAttack();
+        }
+        
+        // Debug ground state
         Debug.Log($"Is Grounded: {isGrounded}, Can Jump: {canJump}");
     }
 
     void FixedUpdate()
     {
-        HandleMovement();
+        if (!isDead)
+        {
+            HandleMovement();
+        }
     }
 
     void HandleInput()
@@ -176,6 +196,8 @@ public class PlayerManager : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
+        if (isDead) return; // Don't take damage if already dead
+        
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
         Debug.Log($"Player took {damage} damage. Health: {currentHealth}/{maxHealth}");
@@ -188,6 +210,8 @@ public class PlayerManager : MonoBehaviour
 
     public void Heal(float healAmount)
     {
+        if (isDead) return; // Don't heal if dead
+        
         currentHealth += healAmount;
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
         UpdateHealthBar();
@@ -196,14 +220,76 @@ public class PlayerManager : MonoBehaviour
 
     void Die()
     {
-        Debug.Log("Player died!");
-        gameObject.SetActive(false);
+        if (isDead) return; // Prevent multiple death calls
+        
+        isDead = true;
+        Debug.Log("Player died! Respawning in " + respawnDelay + " seconds...");
+        
+        // Stop player movement
+        if (rb != null)
+        {
+            rb.velocity = Vector2.zero;
+        }
+        
+        // Start respawn coroutine
+        StartCoroutine(RespawnAfterDelay());
     }
 
-    public float GetCurrentHealth() => currentHealth;
-    public float GetMaxHealth() => maxHealth;
-    public float GetHealthPercentage() => currentHealth / maxHealth;
+    IEnumerator RespawnAfterDelay()
+    {
+        // Wait for respawn delay
+        yield return new WaitForSeconds(respawnDelay);
+        
+        // Respawn the player
+        Respawn();
+    }
 
+    void Respawn()
+    {
+        Debug.Log($"Player respawning at: {spawnPosition}");
+        
+        // Reset position
+        transform.position = spawnPosition;
+        
+        // Reset health
+        currentHealth = maxHealth;
+        UpdateHealthBar();
+        
+        // Reset physics
+        if (rb != null)
+        {
+            rb.velocity = Vector2.zero;
+        }
+        
+        // Reset states
+        isDead = false;
+        canJump = true;
+        isGrounded = false;
+        
+        // Make sure player is active
+        gameObject.SetActive(true);
+        
+        Debug.Log("Player respawned successfully!");
+    }
+
+    // Public method to manually set spawn position
+    public void SetSpawnPosition(Vector3 newSpawnPosition)
+    {
+        spawnPosition = newSpawnPosition;
+        Debug.Log($"Spawn position updated to: {spawnPosition}");
+    }
+
+    // Public method to manually respawn (for testing)
+    public void ForceRespawn()
+    {
+        Die();
+    }
+    
+    public float GetCurrentHealth() { return currentHealth; }
+    public float GetMaxHealth() { return maxHealth; }
+    public float GetHealthPercentage() { return currentHealth / maxHealth; }
+    public bool IsDead() { return isDead; }
+    
     void OnDrawGizmosSelected()
     {
         if (attackPoint != null)
@@ -211,8 +297,12 @@ public class PlayerManager : MonoBehaviour
             Gizmos.color = Color.red; // Color of the circle
             Gizmos.DrawWireSphere(attackPoint.position, attackRange); // Draw circle in Scene view
         }
-    }
 
+        // Draw spawn position
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(spawnPosition, 0.5f);
+    }
+    
 
     public void UpdateHealthBar()
     {
