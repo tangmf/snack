@@ -1,19 +1,17 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Idle : StateMachineBehaviour
 {
     public float moveDistance = 1f;   // how far to sway left/right
     public float cycleDuration = 2f;  // full cycle time (left → right → left)
 
-    private Vector3 startPos;
     private float timer;
+    private float startX;
 
     // Called when entering idle state
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        startPos = animator.transform.position; // store starting position
+        startX = animator.transform.position.x; // only store starting X position
         timer = 0f;
     }
 
@@ -30,7 +28,10 @@ public class Idle : StateMachineBehaviour
         // sine wave oscillation (-1 → 1)
         float offset = Mathf.Sin(angle) * moveDistance;
 
-        // Apply to position (sway left and right)
-        animator.transform.position = startPos + Vector3.right * offset;
+        // Preserve Y and Z (don’t overwrite them)
+        Vector3 pos = animator.transform.position;
+        pos.x = startX + offset;
+
+        animator.transform.position = pos;
     }
 }
