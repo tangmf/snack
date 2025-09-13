@@ -12,6 +12,7 @@ public class PlayerManager : MonoBehaviour
 
     [SerializeField]
     private float attackDamage = 25f;
+
     [SerializeField]
     private float attackRange = 2f;
 
@@ -38,7 +39,10 @@ public class PlayerManager : MonoBehaviour
 
         if (attackPoint == null)
         {
-            Debug.LogError("Attack Point is not assigned in the inspector.");
+            GameObject attackObj = new GameObject("AttackPoint");
+            attackObj.transform.SetParent(transform);
+            attackObj.transform.localPosition = new Vector3(1f, 0f, 0f); // In front of the player
+            attackPoint = attackObj.transform;
         }
     }
 
@@ -72,7 +76,7 @@ public class PlayerManager : MonoBehaviour
     void HandleMeleeAttack()
     {
         // Melee attack with left mouse button or spacebar
-        if ((Input.GetMouseButtonDown(LeftMouseButton) || Input.GetKeyDown(KeyCode.Space)) && CanAttack())
+        if ((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space)) && CanAttack())
         {
             PerformMeleeAttack();
         }
@@ -94,13 +98,7 @@ public class PlayerManager : MonoBehaviour
         
         foreach (Collider2D enemy in hitEnemies)
         {
-            // Try to damage enemy
-            var enemyHealth = enemy.GetComponent<EnemyHealth>();
-            if (enemyHealth != null)
-            {
-                enemyHealth.TakeDamage(attackDamage);
-                Debug.Log($"Hit {enemy.name} for {attackDamage} damage!");
-            }
+            Debug.Log($"Hit {enemy.name} for {attackDamage} damage!");
         }
         
         Debug.Log($"Melee attack! Hit {hitEnemies.Length} enemies.");
@@ -134,11 +132,9 @@ public class PlayerManager : MonoBehaviour
         gameObject.SetActive(false);
     }
     
-    // Getter for UI or other systems
-    public float GetHealthPercentage()
-    {
-        return currentHealth / maxHealth;
-    }
+    public float GetCurrentHealth() { return currentHealth; }
+    public float GetMaxHealth() { return maxHealth; }
+    public float GetHealthPercentage() { return currentHealth / maxHealth; }
     
     void OnDrawGizmosSelected()
     {
