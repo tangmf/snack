@@ -42,7 +42,8 @@ public class SoundMonster : MonoBehaviour
                     currentTarget = sm;
                 }
             }
-            Destroy(gameObject); // destroy bullet on hit
+            // Start chasing player
+            // Destroy(gameObject); // destroy bullet on hit
         }
     }
 

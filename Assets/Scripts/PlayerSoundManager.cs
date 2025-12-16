@@ -14,6 +14,7 @@ public class SoundManager : MonoBehaviour
     private float volumeIncrement = 1.0f;
 
     public CircleCollider2D soundCollider;
+    public GameObject player;
     
     // Start is called before the first frame update
     void Start()
@@ -26,8 +27,7 @@ public class SoundManager : MonoBehaviour
     {
         float delta = volumeIncrement * Time.deltaTime;
 
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || 
-            Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D))
+        if (player != null && player.GetComponent<PlayerController>().isMoving)
             {
                 currentVolume = Mathf.Clamp(currentVolume + delta, 0f, maxVolume);
             } else

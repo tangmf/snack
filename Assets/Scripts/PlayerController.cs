@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
     public GridMap grid;
 
     public bool keyCircle, keySquare, keyTriangle;
+    public bool isMoving = false;
 
     void Update()
     {
@@ -24,6 +25,7 @@ public class PlayerController : MonoBehaviour
         // Debug.Log($"A={Input.GetKey(KeyCode.A)} D={Input.GetKey(KeyCode.D)} W={Input.GetKey(KeyCode.W)} S={Input.GetKey(KeyCode.S)}");
 
         Vector2 move = new Vector2(ix, iy);
+        isMoving = move.sqrMagnitude > 0f;
         if (move.sqrMagnitude > 1f) move.Normalize();
 
         Vector2 pos = transform.position;
