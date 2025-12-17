@@ -441,8 +441,8 @@ namespace Jacob_Yakesh.MonsterChaseLogic.MonsterLogic
         {
             idlingAtTarget = true;
             idleTimer = targetIdleTime;
-            childAnimator.SetFloat("wander", 0);
-            childAnimator.SetFloat("wander", 0);
+            childAnimator.SetFloat("moveX", 0);
+            childAnimator.SetFloat("moveY", 0);
 
             StopFootstepsSound();
             if (enableSoundEffects)
@@ -512,8 +512,8 @@ namespace Jacob_Yakesh.MonsterChaseLogic.MonsterLogic
         }
         else
         {
-            childAnimator.SetFloat("wander", 0);
-            childAnimator.SetFloat("wander", 0);
+            childAnimator.SetFloat("moveX", 0);
+            childAnimator.SetFloat("moveY", 0);
             StopFootstepsSound();
             if (enableSoundEffects)
             {
@@ -539,13 +539,13 @@ namespace Jacob_Yakesh.MonsterChaseLogic.MonsterLogic
             Vector2 movementDirection = path.desiredVelocity.normalized;
             if (movementDirection.sqrMagnitude > 0.1f)
             {
-                childAnimator.SetFloat("hunt", movementDirection.x);
-                childAnimator.SetFloat("hunt", movementDirection.y);
+                childAnimator.SetFloat("moveX", movementDirection.x);
+                childAnimator.SetFloat("moveY", movementDirection.y);
             }
             else
             {
-                childAnimator.SetFloat("wander", 0);
-                childAnimator.SetFloat("wander", 0);
+                childAnimator.SetFloat("moveX", 0);
+                childAnimator.SetFloat("moveY", 0);
             }
         }
 
