@@ -194823,7 +194823,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   coneLight2D: {fileID: 489913642}
   localOffset: {x: -0.15, y: 0.96, z: 0}
-  rotationOffset: 0
+  rotationOffset: -10
   rotationSmooth: 18
   outerAngle: 60
   innerAngle: 40
