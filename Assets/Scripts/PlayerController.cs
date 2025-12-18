@@ -42,7 +42,7 @@ public class PlayerController : MonoBehaviour
 
         // simple visual: rotate player to face mouse (optional)
         float angle = Mathf.Atan2(faceDir.y, faceDir.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0, 0, angle);
+        transform.rotation = Quaternion.Euler(0, 0, angle - 90f);
 
         // // 4) pickup key by current cell
         // Vector2Int curCell = grid.WorldToGrid(transform.position);

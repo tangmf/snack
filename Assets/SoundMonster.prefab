@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 7265064883694373228}
   - component: {fileID: 491289025812184696}
   - component: {fileID: 7589764724966411886}
-  - component: {fileID: 7938980345165141402}
   m_Layer: 0
   m_Name: SoundMonster
   m_TagString: Untagged
@@ -128,12 +127,18 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  huntingSpeed: 5.5
+  wanderingSpeed: 3
+  nextWaypointDistance: 2
   idleTimeAtOneSpot: 3
   timeUntilForgetPlayer: 3
-  soundMonster: {fileID: 3083026819870923286}
-  huntingSpeed: 5
-  wanderingSpeed: 3
-  nextWaypointDistance: 5
+  animator: {fileID: 3678437093659372369}
+  animatorStateParam: State
+  changeStateName: Change
+  wanderStateName: Wander
+  changeClip: {fileID: 7400000, guid: d031bb54fac6ec242a9bd11b7a178103, type: 2}
+  changeAnimationDuration: 0.5
+  visual: {fileID: 0}
 --- !u!114 &7265064883694373228
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -221,51 +226,6 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.1870966, y: 0.6326289}
-  m_Size: {x: 1.6247807, y: 4.100852}
+  m_Offset: {x: 0.022470474, y: 0.22983694}
+  m_Size: {x: 1.5204468, y: 2.6778688}
   m_Direction: 0
---- !u!61 &7938980345165141402
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3802077362528825157}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: -0.83999443, y: 1.7572293}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 5.520591, y: 5.5199995}
-    newSize: {x: 5.520591, y: 5.5199995}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 1.7550964, y: 1.4262362}
-  m_EdgeRadius: 0
