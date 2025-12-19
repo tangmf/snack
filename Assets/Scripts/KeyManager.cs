@@ -8,6 +8,7 @@ public class KeyManager : MonoBehaviour
 
     public event Action<string> OnKeyCollected;
     HashSet<string> collected = new HashSet<string>();
+    public int CollectedCount => collected.Count;
 
     void Awake()
     {

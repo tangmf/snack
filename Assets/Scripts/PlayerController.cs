@@ -15,9 +15,6 @@ public class PlayerController : MonoBehaviour
     Vector2 moveInput;
     public bool isMoving = false;
 
-    // keys
-    public bool keyCircle, keySquare, keyTriangle;
-
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -90,8 +87,11 @@ public class PlayerController : MonoBehaviour
     // Optional: example collision callback
     void OnCollisionEnter2D(Collision2D collision)
     {
-        // e.g. detect walls, enemies, pickups
-        // if (collision.gameObject.CompareTag("Wall")) { /* ... */ }
+        if (!collision.gameObject.CompareTag("Finish")) return;
+        Debug.Log("Level Complete!");
+
+        // Switch to win scene
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Win");
     }
 }
 
