@@ -30,6 +30,12 @@ public class SoundMonster : MonoBehaviour
     public AnimationClip changeClip;
     public float changeAnimationDuration = 0.0f;
 
+    [Header("Sound")]
+    public AudioClip[] discoverSounds;
+    public AudioClip[] idleSounds;
+    public AudioClip[] attackSounds;
+    public float soundVolume = 1.0f;
+
     // Visual transform to rotate/face movement; defaults to this.transform if not set
     public Transform visual;
 
@@ -45,6 +51,8 @@ public class SoundMonster : MonoBehaviour
 
     Coroutine idleCoroutine = null;
     Coroutine changeCoroutine = null;
+    Coroutine idleSoundCoroutine = null;
+    Coroutine huntingSoundCoroutine = null;
 
     // --- Unity callbacks ---
     void Awake()
@@ -69,6 +77,14 @@ public class SoundMonster : MonoBehaviour
         state = newState;
         UpdateAnimator();
         if (state != State.Idle) CancelIdleCycle();
+        
+        // --- Sound coroutines ---
+        StopSoundCoroutines();
+
+        if (state == State.Idle || state == State.Wandering)
+            idleSoundCoroutine = StartCoroutine(PlayIdleSoundsLoop());
+        else if (state == State.Hunting)
+            huntingSoundCoroutine = StartCoroutine(PlayHuntingSoundsLoop());
     }
 
     void UpdateAnimator()
@@ -349,4 +365,40 @@ public class SoundMonster : MonoBehaviour
         targetSoundManager = null;
         waitThenForgetPlayer();
     }
+
+    // --- Sound effects ---
+    IEnumerator PlayHuntingSoundsLoop()
+    {
+        while (state == State.Hunting)
+        {
+            if (attackSounds.Length > 0 && AudioManager.instance != null)
+            {
+                AudioManager.instance.PlayRandomAudioClip(attackSounds, transform, soundVolume);
+            }
+
+            // Wait a random interval between 1–4 seconds
+            yield return new WaitForSeconds(Random.Range(1f, 4f));
+        }
+    }
+
+    IEnumerator PlayIdleSoundsLoop()
+    {
+        while (state == State.Idle || state == State.Wandering)
+        {
+            if (idleSounds.Length > 0 && AudioManager.instance != null)
+            {
+                AudioManager.instance.PlayRandomAudioClip(idleSounds, transform, soundVolume);
+            }
+
+            // Wait a random interval between 2–5 seconds
+            yield return new WaitForSeconds(Random.Range(2f, 5f));
+        }
+    }
+
+    void StopSoundCoroutines()
+    {
+        if (idleSoundCoroutine != null) { StopCoroutine(idleSoundCoroutine); idleSoundCoroutine = null; }
+        if (huntingSoundCoroutine != null) { StopCoroutine(huntingSoundCoroutine); huntingSoundCoroutine = null; }
+    }
+
 }

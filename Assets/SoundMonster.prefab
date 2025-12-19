@@ -138,6 +138,20 @@ MonoBehaviour:
   wanderStateName: Wander
   changeClip: {fileID: 7400000, guid: d031bb54fac6ec242a9bd11b7a178103, type: 2}
   changeAnimationDuration: 0.5
+  discoverSounds:
+  - {fileID: 8300000, guid: 190e8507e0ef3da49be788160c597039, type: 3}
+  - {fileID: 8300000, guid: 45a70182c41605b44ae5eb083e148436, type: 3}
+  - {fileID: 8300000, guid: 20193f546438a1d47b99a7a93a4002c9, type: 3}
+  idleSounds:
+  - {fileID: 8300000, guid: a45c7e07546190348ae62b96d94e8f22, type: 3}
+  - {fileID: 8300000, guid: f5f7b6bd607194e40b8baf41e5dea7f9, type: 3}
+  - {fileID: 8300000, guid: 3b71ca0366c182b4d987d9adafc7768e, type: 3}
+  - {fileID: 8300000, guid: 81604f46ce0d17a43a6a88e22e55d69e, type: 3}
+  - {fileID: 8300000, guid: 73a23943d5a40f346b51c6b0a95fc4ca, type: 3}
+  attackSounds:
+  - {fileID: 8300000, guid: 79ad6bfb6df974f4e987f5530530b346, type: 3}
+  - {fileID: 8300000, guid: a8a18417436baa748ae79ab930c2752d, type: 3}
+  soundVolume: 1
   visual: {fileID: 0}
 --- !u!114 &7265064883694373228
 MonoBehaviour:
