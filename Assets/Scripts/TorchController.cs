@@ -35,6 +35,10 @@ public class TorchController : MonoBehaviour
 
     bool isOn;
 
+    [Header("Sound")]
+    public AudioClip soundClip;
+    public float soundVolume = 1.0f;
+
     void Awake()
     {
         isOn = startOn;
@@ -62,6 +66,7 @@ public class TorchController : MonoBehaviour
         if (Input.GetKeyDown(toggleKey))
         {
             isOn = !isOn;
+            PlayTorchSound();
             ApplyEnabledState(immediate: false);
         }
 
@@ -130,5 +135,17 @@ public class TorchController : MonoBehaviour
         intensity = newIntensity;
         radiusScale = newRadiusScale;
         ApplySettings();
+    }
+
+    void PlayTorchSound()
+    {
+        if (AudioManager.instance == null || soundClip == null)
+            return;
+
+        AudioManager.instance.PlayAudioClip(
+            soundClip,
+            transform,
+            soundVolume
+        );
     }
 }

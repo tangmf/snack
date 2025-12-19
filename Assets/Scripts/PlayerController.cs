@@ -112,17 +112,42 @@ public class PlayerController : MonoBehaviour
     // Optional: example collision callback
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (!collision.gameObject.CompareTag("Finish")) return;
+        if (collision.gameObject.CompareTag("Finish"))
+        {
         Debug.Log("Level Complete!");
 
         // Switch to win scene
         UnityEngine.SceneManagement.SceneManager.LoadScene("Win");
+        } else if (collision.gameObject.CompareTag("Enemy"))
+        {
+            Debug.Log("Hit by Enemy! Game Over!");
+            MonsterIdentity identity = collision.gameObject.GetComponent<MonsterIdentity>();
+            if (identity == null)
+            {
+                Debug.LogWarning("Enemy missing MonsterIdentity");
+                return;
+            }
+
+            if (JumpScareManager.Instance == null)
+            {
+                Debug.LogError("JumpScareManager missing in scene");
+                return;
+            }
+
+            JumpScareManager.Instance.PlayJumpScare(identity.monsterType);
+
+            // Enable game over UI
+            GameOverManager.Instance.ShowGameOver();
+
+            // Optional: freeze player / game
+            Time.timeScale = 0f;
+        }
     }
 
     void HandleFootsteps()
     {
         int keys = KeyManager.Instance.CollectedCount;
-        AudioClip desiredClip = keyJingleClips[Mathf.Clamp(keys, 0, keyJingleClips.Length)];
+        AudioClip desiredClip = keyJingleClips[Mathf.Clamp(keys, 0, keyJingleClips.Length - 1)];
 
         if (!isMoving)
         {

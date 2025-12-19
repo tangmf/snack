@@ -3,34 +3,44 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class KeyPickup : MonoBehaviour
 {
-    [Tooltip("Unique id for this key (e.g. 'red', 'blue' or 'key1')")]
     public string keyId = "key";
     public AudioClip[] pickupSounds;
 
-    Collider2D col;
+    bool playerInRange = false;
 
     void Awake()
     {
-        col = GetComponent<Collider2D>();
-        // ensure trigger so player can press F while overlapping
-        if (col != null) col.isTrigger = true;
+        Collider2D col = GetComponent<Collider2D>();
+        col.isTrigger = true;
     }
 
-    void OnTriggerStay2D(Collider2D other)
+    void Update()
     {
-        if (!other.CompareTag("Player")) return;
+        if (!playerInRange) return;
+
         if (Input.GetKeyDown(KeyCode.F))
         {
             Collect();
         }
     }
 
-    public void Collect()
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+            playerInRange = true;
+    }
+
+    void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+            playerInRange = false;
+    }
+
+    void Collect()
     {
         KeyManager.Instance?.CollectKey(keyId);
 
         PlayPickupSound();
-        
         Destroy(gameObject);
     }
 

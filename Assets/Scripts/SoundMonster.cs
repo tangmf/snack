@@ -31,7 +31,6 @@ public class SoundMonster : MonoBehaviour
     public float changeAnimationDuration = 0.0f;
 
     [Header("Sound")]
-    public AudioClip[] discoverSounds;
     public AudioClip[] idleSounds;
     public AudioClip[] attackSounds;
     public float soundVolume = 1.0f;

@@ -14,7 +14,6 @@ public class KeyManager : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
     }
 
     public bool IsCollected(string id) => collected.Contains(id);

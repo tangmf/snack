@@ -136,6 +136,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   keyId: Triangle
+  pickupSounds:
+  - {fileID: 8300000, guid: 327303ca99a25884cb29bf3acdb75736, type: 3}
 --- !u!114 &4386675254123269586
 MonoBehaviour:
   m_ObjectHideFlags: 0

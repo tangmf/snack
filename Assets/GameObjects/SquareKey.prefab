@@ -218,6 +218,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   keyId: Square
+  pickupSounds:
+  - {fileID: 8300000, guid: 327303ca99a25884cb29bf3acdb75736, type: 3}
 --- !u!114 &2637738804846971881
 MonoBehaviour:
   m_ObjectHideFlags: 0
