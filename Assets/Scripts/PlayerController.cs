@@ -15,6 +15,13 @@ public class PlayerController : MonoBehaviour
     Vector2 moveInput;
     public bool isMoving = false;
 
+    [Header("Footstep Audio")]
+    public AudioClip[] footstepClips;
+    public float footstepInterval = 0.4f;
+    public float footstepVolume = 0.8f;
+
+    float footstepTimer;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -63,6 +70,9 @@ public class PlayerController : MonoBehaviour
         float angle = Mathf.Atan2(faceDir.y, faceDir.x) * Mathf.Rad2Deg;
         // calculate desired rotation but don't set transform directly (use physics in FixedUpdate)
         targetRotation = angle - 90f;
+
+        // 3) footstep audio
+        HandleFootsteps();
     }
 
     void FixedUpdate()
@@ -92,6 +102,35 @@ public class PlayerController : MonoBehaviour
 
         // Switch to win scene
         UnityEngine.SceneManagement.SceneManager.LoadScene("Win");
+    }
+
+    void HandleFootsteps()
+    {
+        if (!isMoving)
+        {
+            footstepTimer = 0f;
+            return;
+        }
+
+        footstepTimer -= Time.deltaTime;
+
+        if (footstepTimer <= 0f)
+        {
+            PlayFootstep();
+            footstepTimer = footstepInterval;
+        }
+    }
+
+    void PlayFootstep()
+    {
+        if (AudioManager.instance == null || footstepClips.Length == 0)
+            return;
+
+        AudioManager.instance.PlayRandomAudioClip(
+            footstepClips,
+            transform,
+            footstepVolume
+        );
     }
 }
 
