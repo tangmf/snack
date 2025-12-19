@@ -42,4 +42,27 @@ public class AudioManager : MonoBehaviour
         float clipLength = audioSource.clip.length;
         Destroy(audioSource.gameObject, clipLength);
     }
+
+    public void PlayLoop(AudioClip clip, float volume)
+    {
+        if (audioObject.clip == clip && audioObject.isPlaying) return;
+
+        audioObject.clip = clip;
+        audioObject.volume = volume;
+        audioObject.loop = true;
+        audioObject.Play();
+    }
+
+    public void StopLoop()
+    {
+        audioObject.Stop();
+        audioObject.clip = null;
+        audioObject.loop = false;
+    }
+
+    public void SetVolume(float volume)
+    {
+        if (audioObject != null)
+            audioObject.volume = volume;
+    }
 }

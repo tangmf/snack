@@ -5,6 +5,7 @@ public class KeyPickup : MonoBehaviour
 {
     [Tooltip("Unique id for this key (e.g. 'red', 'blue' or 'key1')")]
     public string keyId = "key";
+    public AudioClip[] pickupSounds;
 
     Collider2D col;
 
@@ -27,7 +28,21 @@ public class KeyPickup : MonoBehaviour
     public void Collect()
     {
         KeyManager.Instance?.CollectKey(keyId);
-        // play pickup sound / VFX here
+
+        PlayPickupSound();
+        
         Destroy(gameObject);
+    }
+
+    void PlayPickupSound()
+    {
+        if (pickupSounds != null && pickupSounds.Length > 0)
+        {
+            AudioManager.instance.PlayRandomAudioClip(
+                pickupSounds,
+                transform,
+                1.0f
+            );
+        }
     }
 }

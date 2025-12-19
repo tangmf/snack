@@ -136,6 +136,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   keyId: Circle
+  pickupSounds:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!114 &5590722272991928316
 MonoBehaviour:
   m_ObjectHideFlags: 0

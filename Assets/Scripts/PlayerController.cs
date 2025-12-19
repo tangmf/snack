@@ -15,8 +15,10 @@ public class PlayerController : MonoBehaviour
     Vector2 moveInput;
     public bool isMoving = false;
 
-    [Header("Footstep Audio")]
+    [Header("Audio")]
     public AudioClip[] footstepClips;
+    public AudioSource keyJingleLoopSource;
+    public AudioClip[] keyJingleClips;
     public float footstepInterval = 0.4f;
     public float footstepVolume = 0.8f;
 
@@ -119,9 +121,14 @@ public class PlayerController : MonoBehaviour
 
     void HandleFootsteps()
     {
+        int keys = KeyManager.Instance.CollectedCount;
+        AudioClip desiredClip = keyJingleClips[Mathf.Clamp(keys, 0, keyJingleClips.Length)];
+
         if (!isMoving)
         {
             footstepTimer = 0f;
+            if (keyJingleLoopSource.isPlaying)
+                keyJingleLoopSource.Stop();
             return;
         }
 
@@ -131,6 +138,15 @@ public class PlayerController : MonoBehaviour
         {
             PlayFootstep();
             footstepTimer = footstepInterval;
+        }
+
+        // key sounds
+        if (keyJingleLoopSource.clip != desiredClip || !keyJingleLoopSource.isPlaying)
+        {
+            keyJingleLoopSource.Stop();
+            keyJingleLoopSource.clip = desiredClip;
+            keyJingleLoopSource.loop = true;
+            keyJingleLoopSource.Play();
         }
     }
 
