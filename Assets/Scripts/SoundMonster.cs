@@ -28,7 +28,7 @@ public class SoundMonster : MonoBehaviour
     public string changeStateName = "Change";
     public string wanderStateName = "Wander";
     public AnimationClip changeClip;
-    public float changeAnimationDuration = 0.5f;
+    public float changeAnimationDuration = 0.0f;
 
     // Visual transform to rotate/face movement; defaults to this.transform if not set
     public Transform visual;

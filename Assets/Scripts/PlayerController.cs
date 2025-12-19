@@ -22,6 +22,10 @@ public class PlayerController : MonoBehaviour
 
     float footstepTimer;
 
+    [Header("Animation")]
+    public Animator animator;
+
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -48,6 +52,11 @@ public class PlayerController : MonoBehaviour
         {
             gameObject.AddComponent<CircleCollider2D>();
         }
+
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+        }
     }
 
     void Update()
@@ -59,6 +68,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.D)) ix += 1f;
         if (Input.GetKey(KeyCode.W)) iy += 1f;
         if (Input.GetKey(KeyCode.S)) iy -= 1f;
+        if (Input.GetKey(KeyCode.F)) PlayInteractAnimation();
 
         moveInput = new Vector2(ix, iy);
         if (moveInput.sqrMagnitude > 1f) moveInput.Normalize();
@@ -73,6 +83,9 @@ public class PlayerController : MonoBehaviour
 
         // 3) footstep audio
         HandleFootsteps();
+
+        // 4) update animator
+        UpdateAnimations();
     }
 
     void FixedUpdate()
@@ -131,6 +144,27 @@ public class PlayerController : MonoBehaviour
             transform,
             footstepVolume
         );
+    }
+
+    void UpdateAnimations()
+    {
+        if (animator == null) return;
+
+        animator.SetBool("IsMoving", isMoving);
+    }
+
+    public void PlayInteractAnimation()
+    {
+        if (animator == null) return;
+
+        animator.SetBool("IsInteracting", true);
+    }
+
+    public void EndInteractAnimation()
+    {
+        if (animator == null) return;
+
+        animator.SetBool("IsInteracting", false);
     }
 }
 
